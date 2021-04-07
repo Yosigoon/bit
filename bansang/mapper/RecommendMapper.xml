@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="org.bansang.mapper.RecommendMapper">
+	<insert id="fileUpload" >
+	       insert into tbl_recommend_image (recommend_number, image_name) values
+	       <foreach item="image" collection="array" separator=",">  
+	       (LAST_INSERT_ID(), #{image})
+	       </foreach>
+	</insert>
+	 
+	<select id="getRecommendInfo" resultType = "RecommendDTO">
+		select store_name storeName, recommend_contents recommendContents from (
+			select * from tbl_recommend where recommend_number = #{recommendNumber}
+    		) t1, tbl_store t2 where t1.store_number = t2.store_number
+	</select>
+	<update id="updateFirstImage">
+		update tbl_recommend set image_name = (
+			select image_name from tbl_recommend_image where recommend_number = LAST_INSERT_ID() limit 0,1
+		)
+ 		where recommend_number = LAST_INSERT_ID()
+	</update>
+	<select id="recommendList" resultType = "RecommendDTO">
+		select store_name storeName, t1.image_name imageName, t1.recommend_number recommendNumber, t2.area_keyword areaKeyword, register_date registerDate from (
+			select * from tbl_recommend where member_id = #{memberId}
+		) t1, tbl_store t2 where t1.store_number = t2.store_number order by t2.area_keyword
+	</select>
+</mapper>

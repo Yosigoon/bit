@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.bansang.mapper.BansangMapper">
+	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 's'.toString()">
+				and store_name like CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="searchType == 'a'.toString()">
+				and area_keyword like CONCAT('%', #{keyword}, '%')
+			</if>
+		</if>
+	</sql>
+
+	<select id="listPage" resultType="RecommendDTO">
+		<![CDATA[  
+		  select *
+		  from tbl_store
+		  where store_number > 0
+		]]>
+		
+		<include refid="search"></include>
+  
+		<![CDATA[    
+		  order by store_number desc
+		  limit #{skip}, 9
+		]]>
+	</select>
+
+	<select id="getTotal" resultType="int">
+		<![CDATA[  
+		  select count(store_number)
+		  from tbl_store
+		  where store_number > 0
+		]]>
+		<include refid="search"></include>
+	</select>
+
+</mapper>

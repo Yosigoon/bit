@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="org.bansang.mapper.GroupMapper">
+		<insert id="groupMemberRegister" >
+		       insert into tbl_group_member (member_name, member_id, group_number) values
+		       <foreach item="item" collection="list" separator=",">  
+			       (#{item.memberName}, #{item.memberId}, LAST_INSERT_ID())
+		       </foreach>
+		</insert>
+		<select id="groupList" resultType = "GroupDTO">
+		select t3.group_number groupNumber, group_name groupName, group_leader groupLeader,member_name groupLeaderName, group_member_count groupMemberCount  from (
+			select t1.group_number, group_name, group_leader, group_member_count from (
+				select group_number from tbl_group_member where member_id = #{memberId}
+			) t1, tbl_group t2 where t1.group_number = t2.group_number
+		) t3, tbl_group_member t4 where t3.group_leader = t4.member_id and t3.group_number = t4.group_number
+		</select>
+		<select id="groupMemberList" resultType = "GroupMemberDTO">
+				select group_number groupNumber, t1.member_id memberId, t1.member_name memberName, membership, t2.member_image memberImage from (
+					select * from tbl_group_member where group_number = #{groupNumber}
+				) t1 left join tbl_member t2 on t1.member_id = t2.member_id
+		</select>
+		
+		<select id="appGroupList" resultType = "GroupDTO">
+				select t1.group_number groupNumber, member_id memberId, t2.member_name groupLeader, group_name groupName, group_member_count groupMemberCount, register_date registerDate  from (
+					select * from tbl_group where group_number in (
+						select group_number from tbl_group_member where member_id = #{memberId}
+					)
+				) t1, tbl_group_member t2 where t1.group_number = t2.group_number and t1.group_leader = t2.member_id
+		</select>
+	
+	
+
+		
+  </mapper>
